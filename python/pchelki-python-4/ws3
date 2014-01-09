@@ -1,0 +1,53 @@
+#!/usr/bin/python3
+import collections, os, sys
+from itertools import combinations
+
+def funny_print(r1, r2):
+  arr1, arr2 = (list(r1), list(r2))
+  for c in arr1:
+    if c in arr2:
+      print(c, end="")
+      arr2.remove(c)
+    else:
+      print('\033[4m' + c + '\033[0m', end='')
+  print(" ", end='')
+
+def clear(): os.system('clear')
+clear()
+
+print("Prosze czekac, wczytuje slownik: a", end='')
+ll="a"
+with open("words.txt") as plik:
+    slownik = collections.defaultdict(list)
+    for slowo in plik:
+        if slowo[0] != ll:
+          ll=slowo[0]
+          sys.stdout.write(ll)
+          sys.stdout.flush()
+        slowo=slowo.strip()
+        if len(slowo)>=5:
+            klucz=''.join(sorted(slowo))
+            slownik[klucz].append(slowo)
+            klucz_lst = list(klucz)
+            for i in range(0,len(klucz)):
+                klucz_z_kropka = ''.join(sorted(klucz_lst[:i] + ["."] + klucz_lst[i+1:]))
+                slownik[klucz_z_kropka].append(slowo)
+                slownik[klucz_z_kropka] = list(set(slownik[klucz_z_kropka]))
+
+#slownik = sorted(' '.join([klucz] + wartosc) for klucz, wartosc in slownik.items())
+
+while True:
+    litery = input("\n\nWpisz litery, kropka = dowolna litera: ")
+    clear()
+    wyniki = []
+    for dlugosc_slowa in range(len(litery), 4, -1):
+        for kombinacja in combinations(litery, dlugosc_slowa):
+            kombinacja = ''.join(sorted(list(kombinacja)))
+            if kombinacja in slownik:
+                wyniki = list(set(wyniki + slownik[kombinacja]))
+            if len(wyniki)>150: break
+    wyniki.sort(key=len, reverse=True)
+    print("Wyrazy z liter %s:\n\n" % litery)
+    for i, r in enumerate(wyniki):
+      funny_print(r, litery)
+      if i % 7 == 6: print()
